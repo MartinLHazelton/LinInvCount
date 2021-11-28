@@ -21,6 +21,7 @@
 #' @param burnin Number of iteractions for burn in period. Defaults to 2000, which is usually more than adequate.
 #' @param verbose Controls level of detail in recording lattice bases used.
 #' @param THIN Thinning parameter for output. Defaults to 1 (no thinning).
+#' @param ... Additional arguments may be passed to lambda.updater.
 #' @return A list with components X (a matrix, each row corresponding to samples for an entry of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), OTHER.PARS (a matrix, each row corresponding to an additional parameter to be monitored) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
 #' @export
 #' @examples 
@@ -28,12 +29,17 @@
 #' lu <- function(x,lambda,NB.alpha=NA,lambda.tuning=1,lambda.additional=NA) { list(lambda=rgamma(length(lambda),shape=x+0.5*LondonRoad$lambda,rate=1.5),other.pars=numeric(0),NB.alpha=NA) }
 #' Xlambdasampler(y=LondonRoad$y,A=LondonRoad$A,lambda.updater=lu,lambda.ini=LondonRoad$lambda,Model="Poisson",Method="Gibbs",tune.par=0.5,combine=FALSE)
 
-Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH", Reorder=TRUE, tune.par=0.5, combine=FALSE, x.order=NULL, x.ini=NULL, Model="Poisson", Proposal="Unif", NB.alpha.ini=1, lambda.tuning=NA, lambda.additional=NA, ndraws = 10000, burnin = 2000, verbose = 0, THIN = 1) {
+Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH", Reorder=TRUE, tune.par=0.5, combine=FALSE, x.order=NULL, x.ini=NULL, Model="Poisson", Proposal="Unif", NB.alpha.ini=1, lambda.tuning=NA, lambda.additional=NA, ndraws = 10000, burnin = 2000, verbose = 0, THIN = 1, ...) {
 	require(lpSolve)
 	require(numbers)
 	require(extraDistr)
   	if(Model=="NegBin" & NB.alpha.ini<=0) NB.alpha.ini=1
 	if(Model=="Uniform") Method <- "Gibbs"
+
+	zero.cols.ind <- which(colSums(A)==0)
+	non.zero.cols.ind <- which(colSums(A) > 0)
+	zero.cols <- (length(zero.cols.ind) == 0)
+
 	y <- as.numeric(y)
 	r <- ncol(A)
 	n <- nrow(A)
@@ -44,7 +50,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	lambda <- lambda.ini
 	
 	if (Reorder){
-		lambda.star <- lambda
+		lambda.star <- lambda - (colSums(A)==0)*1e15
 		lam.order <- order(lambda.star,decreasing=TRUE)  
 		A <- A[,lam.order]
 		x.order <- lam.order
@@ -88,8 +94,9 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 
 	if (!is.null(x.ini)) x.ini <- x.ini[x.order]
 	if (is.null(x.ini)){
-		x.ini <- lp("max",objective.in=rep(1,r),const.mat=A,const.dir=rep("=",nrow(A)),const.rhs=y,all.int=T)$solution
+		x.ini <- lp("max",objective.in=rep(1,r),const.mat=A,const.dir=rep("=",nrow(A)),const.rhs=y,all.int=T)$solution  # Columns of A with zero sum return corresponding x-values of 1e+30
 	}
+	x.ini[zero.cols.ind] <- round(lambda[zero.cols.ind])
 	x <- x.ini
 #       X[x.order,1] <- x
 #	if (verbose==1) X.ORDER[,1] <- x.order
@@ -104,7 +111,10 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 				z <- U%*%delta
 			}
 			if (abs(dA1)!=1) { if(is_wholenumber(z)==F) z <- round(z*abs(dA1))/mGCD(round(abs(z*dA1))) }
-			max.move <- floor(min((x/abs(z))[which(z<0)]))
+			ratio <- (x/abs(z))[which(z<0)]
+			if (length(ratio)==0) ratio <- 1e+15
+#			max.move <- floor(min((x/abs(z))[which(z<0)]))
+			max.move <- floor(min(ratio))
 			min.move <- -floor(min((x/abs(z))[which(z>0)]))
 			x.min <- x+min.move*z
 			x.max <- x+max.move*z
