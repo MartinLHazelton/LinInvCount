@@ -38,7 +38,8 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 
 	zero.cols.ind <- which(colSums(A)==0)
 	non.zero.cols.ind <- which(colSums(A) > 0)
-	zero.cols <- (length(zero.cols.ind) == 0)
+	zero.cols <- (length(zero.cols.ind) > 0)
+	if (zero.cols) max.ratio <- max(c(5*lambda.ini,y))
 
 	y <- as.numeric(y)
 	r <- ncol(A)
@@ -49,18 +50,20 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 
 	lambda <- lambda.ini
 	
+
 	if (Reorder){
 		lambda.star <- lambda - (colSums(A)==0)*1e15
 		lam.order <- order(lambda.star,decreasing=TRUE)  
 		A <- A[,lam.order]
 		x.order <- lam.order
-		for (i in 3:n){
+		for (i in 2:n){
 			while (qr(A[,1:i])$rank < i){
 				A <- A[,c(1:(i-1),(i+1):r,i)]
 				x.order <- x.order[c(1:(i-1),(i+1):r,i)]
 			}
 		}
 	}
+
 
 	if (!Reorder) { 
 		if(is.null(x.order)) x.order <- 1:r
@@ -96,7 +99,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	if (is.null(x.ini)){
 		x.ini <- lp("max",objective.in=rep(1,r),const.mat=A,const.dir=rep("=",nrow(A)),const.rhs=y,all.int=T)$solution  # Columns of A with zero sum return corresponding x-values of 1e+30
 	}
-	x.ini[zero.cols.ind] <- round(lambda[zero.cols.ind])
+	x.ini[x.ini > 1e+29] <- max(y)
 	x <- x.ini
 #       X[x.order,1] <- x
 #	if (verbose==1) X.ORDER[,1] <- x.order
@@ -112,7 +115,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			}
 			if (abs(dA1)!=1) { if(is_wholenumber(z)==F) z <- round(z*abs(dA1))/mGCD(round(abs(z*dA1))) }
 			ratio <- (x/abs(z))[which(z<0)]
-			if (length(ratio)==0) ratio <- 1e+15
+			if (length(ratio)==0) ratio <- max.ratio
 #			max.move <- floor(min((x/abs(z))[which(z<0)]))
 			max.move <- floor(min(ratio))
 			min.move <- -floor(min((x/abs(z))[which(z>0)]))
