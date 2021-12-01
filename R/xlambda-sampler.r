@@ -21,7 +21,6 @@
 #' @param burnin Number of iteractions for burn in period. Defaults to 2000, which is usually more than adequate.
 #' @param verbose Controls level of detail in recording lattice bases used.
 #' @param THIN Thinning parameter for output. Defaults to 1 (no thinning).
-#' @param ... Additional arguments may be passed to lambda.updater.
 #' @return A list with components X (a matrix, each row corresponding to samples for an entry of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), OTHER.PARS (a matrix, each row corresponding to an additional parameter to be monitored) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
 #' @export
 #' @examples 
@@ -29,7 +28,7 @@
 #' lu <- function(x,lambda,NB.alpha=NA,lambda.tuning=1,lambda.additional=NA) { list(lambda=rgamma(length(lambda),shape=x+0.5*LondonRoad$lambda,rate=1.5),other.pars=numeric(0),NB.alpha=NA) }
 #' Xlambdasampler(y=LondonRoad$y,A=LondonRoad$A,lambda.updater=lu,lambda.ini=LondonRoad$lambda,Model="Poisson",Method="Gibbs",tune.par=0.5,combine=FALSE)
 
-Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH", Reorder=TRUE, tune.par=0.5, combine=FALSE, x.order=NULL, x.ini=NULL, Model="Poisson", Proposal="Unif", NB.alpha.ini=1, lambda.tuning=NA, lambda.additional=NA, ndraws = 10000, burnin = 2000, verbose = 0, THIN = 1, ...) {
+Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH", Reorder=TRUE, tune.par=0.5, combine=FALSE, x.order=NULL, x.ini=NULL, Model="Poisson", Proposal="Unif", NB.alpha.ini=1, lambda.tuning=NA, lambda.additional=NA, ndraws = 10000, burnin = 2000, verbose = 0, THIN = 1) {
 	require(lpSolve)
 	require(numbers)
 	require(extraDistr)
@@ -187,7 +186,11 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 				ii <- sample(1:n,1)
 				swap.indx <- abs(C[ii,])>tol
 				if (any(swap.indx)){
-					jj <- sample((1:(r-n))[swap.indx],1)
+					if (sum(swap.indx > 1)) {
+						jj <- sample((1:(r-n))[swap.indx],1)
+					} else {
+						jj <- (1:(r-n))[swap.indx]
+					}
 					if (lambda.star[ii] <= lambda.star[jj+n]/abs(C[ii,jj])){
 					ei <- rep(0,n)
  					ej <- rep(0,r-n)
@@ -206,7 +209,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 		X[x.order,iter] <- x
 		if (verbose==1) X.ORDER[,iter] <- x.order
 		if (Model=="NegBin"){
-			updates <- lambda.updater(x=x[order(x.order)],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.tuning,lambda.additional)
+			updates <- lambda.updater(x=x[order(x.order)],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.tuning=alpha,lambda.tuning,lambda.additional=lambda.additional)
 			lambda <- updates$lambda[x.order]
 			NB.alpha <- updates$NB.alpha
 			OTHER.PARS <- cbind(OTHER.PARS,updates$other.pars)
@@ -214,7 +217,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			NB.ALPHA[iter] <- NB.alpha
 		}
 		if (Model=="Poisson"){
-			updates <- lambda.updater(x=x[order(x.order)],lambda=lambda[order(x.order)],lambda.tuning,lambda.additional)
+			updates <- lambda.updater(x=x[order(x.order)],lambda=lambda[order(x.order)],lambda.tuning,lambda.additional=lambda.additional)
 			lambda <- updates$lambda[x.order]
 			OTHER.PARS <- cbind(OTHER.PARS,updates$other.pars)
 			LAMBDA[,iter] <- updates$lambda

@@ -24,8 +24,7 @@ Xlambdasampler(
   ndraws = 10000,
   burnin = 2000,
   verbose = 0,
-  THIN = 1,
-  ...
+  THIN = 1
 )
 }
 \arguments{
@@ -66,8 +65,6 @@ Xlambdasampler(
 \item{verbose}{Controls level of detail in recording lattice bases used.}
 
 \item{THIN}{Thinning parameter for output. Defaults to 1 (no thinning).}
-
-\item{...}{Additional arguments may be passed to lambda.updater.}
 }
 \value{
 A list with components X (a matrix, each row corresponding to samples for an entry of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), OTHER.PARS (a matrix, each row corresponding to an additional parameter to be monitored) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
