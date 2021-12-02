@@ -38,12 +38,13 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	zero.cols.ind <- which(colSums(A)==0)
 	non.zero.cols.ind <- which(colSums(A) > 0)
 	zero.cols <- (length(zero.cols.ind) > 0)
-	if (zero.cols) max.ratio <- max(c(5*lambda.ini,y))
 
 	Y <- as.matrix(y)
 	r <- ncol(A)
 	n <- nrow(A)
 	ntime <- ncol(Y)
+
+	if (zero.cols) max.ratio <- max(c(5*lambda.ini,c(Y)))
 
 	if(!is.null(x.ini)) x.ini <- as.matrix(x.ini)
 	tol <- 10^{-10}
