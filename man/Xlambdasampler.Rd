@@ -28,7 +28,7 @@ Xlambdasampler(
 )
 }
 \arguments{
-\item{y}{Vector of observed count data.}
+\item{y}{Matrix of sequence of observed count data vectors; each column is an observation.}
 
 \item{A}{Model configuration matrix, assumed to be binary.}
 
@@ -46,7 +46,7 @@ Xlambdasampler(
 
 \item{x.order}{If Reorder=FALSE, x.order can be used to reorder columns of A to match ordering of entries of x. Defaults to NULL when no such reordering is performed.}
 
-\item{x.ini}{Vector of initial values for x. Default is NULL, when initial values derived through integer programming.}
+\item{x.ini}{Matrix of initial values for x, with column orderings matching that for y. Default is NULL, when initial values derived through integer programming.}
 
 \item{Model}{"Poisson" or "NegBin".}
 
@@ -67,7 +67,7 @@ Xlambdasampler(
 \item{THIN}{Thinning parameter for output. Defaults to 1 (no thinning).}
 }
 \value{
-A list with components X (a matrix, each row corresponding to samples for an entry of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), OTHER.PARS (a matrix, each row corresponding to an additional parameter to be monitored) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
+A list with components X (an array, for which X\link{i,j,k} is the k-th sampled value of the i-th component of the j-th observation of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), OTHER.PARS (a matrix, each row corresponding to an additional parameter to be monitored) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
 }
 \description{
 Consider the linear inverse problem y=Ax, where x follows a Poisson or negative binomial distribution with mean lambda = E\link{x}. This function jointly samples lambda and x.
