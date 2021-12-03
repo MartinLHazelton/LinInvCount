@@ -93,6 +93,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	X <- array(0, dim=c(r,ntime,ndraws + burnin))
 	LAMBDA <- matrix(0, r, ndraws + burnin)
 	NB.ALPHA <- numeric(ndraws + burnin)
+	other.pars <- list()
 	OTHER.PARS <- numeric(0)
 	if (verbose==1) X.ORDER <- matrix(0, r, ndraws + burnin)
 
@@ -221,7 +222,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 		}
 		if (verbose==1) X.ORDER[,iter] <- x.order
 		if (Model=="NegBin"){
-			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.tuning=alpha,lambda.tuning,lambda.additional=lambda.additional)
+			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.tuning=alpha,lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
 			NB.alpha <- updates$NB.alpha
 			OTHER.PARS <- cbind(OTHER.PARS,updates$other.pars)
@@ -229,7 +230,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			NB.ALPHA[iter] <- NB.alpha
 		}
 		if (Model=="Poisson"){
-			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.tuning,lambda.additional=lambda.additional)
+			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
 			OTHER.PARS <- cbind(OTHER.PARS,updates$other.pars)
 			LAMBDA[,iter] <- updates$lambda
