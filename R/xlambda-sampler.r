@@ -94,7 +94,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	LAMBDA <- matrix(0, r, ndraws + burnin)
 	NB.ALPHA <- numeric(ndraws + burnin)
 	other.pars <- list()
-	OTHER.PARS <- numeric(0)
+	OTHER.PARS <- list()
 	if (verbose==1) X.ORDER <- matrix(0, r, ndraws + burnin)
 
 	NB.alpha <- NB.alpha.ini
@@ -225,14 +225,16 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.tuning=alpha,lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
 			NB.alpha <- updates$NB.alpha
-			OTHER.PARS <- cbind(OTHER.PARS,updates$other.pars)
+			other.pars <- updates$other.pars
+			OTHER.PARS <-  mapply(c, OTHER.PARS, updates$other.pars, SIMPLIFY = FALSE)
 			LAMBDA[,iter] <- updates$lambda
 			NB.ALPHA[iter] <- NB.alpha
 		}
 		if (Model=="Poisson"){
 			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
-			OTHER.PARS <- cbind(OTHER.PARS,updates$other.pars)
+			other.pars <- updates$other.pars
+			OTHER.PARS <-  mapply(c, OTHER.PARS, updates$other.pars, SIMPLIFY = FALSE)
 			LAMBDA[,iter] <- updates$lambda
 			NB.ALPHA[iter] <- NA
 		}
