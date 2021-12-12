@@ -21,7 +21,7 @@
 #' @param burnin Number of iteractions for burn in period. Defaults to 2000, which is usually more than adequate.
 #' @param verbose Controls level of detail in recording lattice bases used.
 #' @param THIN Thinning parameter for output. Defaults to 1 (no thinning).
-#' @return A list with components X (an array, for which X[i,j,k] is the k-th sampled value of the i-th component of the j-th observation of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), OTHER.PARS (a matrix, each row corresponding to an additional parameter to be monitored) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
+#' @return A list with components X (an array, for which X[i,j,k] is the k-th sampled value of the i-th component of the j-th observation of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
 #' @export
 #' @examples 
 #' data(LondonRoad)
@@ -94,19 +94,20 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	LAMBDA <- matrix(0, r, ndraws + burnin)
 	NB.ALPHA <- numeric(ndraws + burnin)
 	other.pars <- list()
-	OTHER.PARS <- list()
 	if (verbose==1) X.ORDER <- matrix(0, r, ndraws + burnin)
 
 	NB.alpha <- NB.alpha.ini
 
 	if (!is.null(x.ini)) x.ini <- x.ini[x.order,]
 	if (is.null(x.ini)){
-		x.ini <- matrix(0,nrow=r,ncol=ntime)
-		for (tt in 1:ntime){
-			x.ini[,tt] <- lp("max",objective.in=rep(1,r),const.mat=A,const.dir=rep("=",nrow(A)),const.rhs=c(Y[,tt]),all.int=T)$solution  # Columns of A with zero sum return corresponding x-values of 1e+30
-		}
+       		x.ini <- matrix(0, nrow = r, ncol = ntime)
+	  	A.nozero <- A[,colSums(A)>0.01]
+	  	r.nozero <- ncol(A.nozero)
+        	for (tt in 1:ntime) {
+            		x.ini[colSums(A)>0.01, tt] <- lp("max", objective.in = rep(1, r.nozero), const.mat = A.nozero, const.dir = rep("=", nrow(A)), const.rhs = c(Y[, tt]), all.int = T)$solution
+			x.ini[colSums(A)<0.01 ,tt] <- mean(x.ini[colSums(A)>0.01 ,tt])
+        	}
 	}
-	x.ini[x.ini > 1e+29] <- max(Y)
 	xx <- x.ini
         X[x.order,,1] <- xx
 	LAMBDA[x.order,1] <- lambda
@@ -226,7 +227,6 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			lambda <- updates$lambda[x.order]
 			NB.alpha <- updates$NB.alpha
 			other.pars <- updates$other.pars
-			OTHER.PARS <-  mapply(c, OTHER.PARS, updates$other.pars, SIMPLIFY = FALSE)
 			LAMBDA[,iter] <- updates$lambda
 			NB.ALPHA[iter] <- NB.alpha
 		}
@@ -234,13 +234,12 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
 			other.pars <- updates$other.pars
-			OTHER.PARS <-  mapply(c, OTHER.PARS, updates$other.pars, SIMPLIFY = FALSE)
 			LAMBDA[,iter] <- updates$lambda
 			NB.ALPHA[iter] <- NA
 		}
 	}
 	if (verbose==1) x.order <- X.ORDER
-	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],OTHER.PARS=OTHER.PARS[,seq(1,ncol(OTHER.PARS),by=THIN)],x.order=x.order)
+	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],x.order=x.order)
 }
 
 

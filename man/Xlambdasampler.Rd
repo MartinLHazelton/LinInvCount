@@ -67,7 +67,7 @@ Xlambdasampler(
 \item{THIN}{Thinning parameter for output. Defaults to 1 (no thinning).}
 }
 \value{
-A list with components X (an array, for which X\link{i,j,k} is the k-th sampled value of the i-th component of the j-th observation of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), OTHER.PARS (a matrix, each row corresponding to an additional parameter to be monitored) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
+A list with components X (an array, for which X\link{i,j,k} is the k-th sampled value of the i-th component of the j-th observation of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
 }
 \description{
 Consider the linear inverse problem y=Ax, where x follows a Poisson or negative binomial distribution with mean lambda = E\link{x}. This function jointly samples lambda and x.
