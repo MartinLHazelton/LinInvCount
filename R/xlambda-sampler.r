@@ -223,7 +223,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 		}
 		if (verbose==1) X.ORDER[,iter] <- x.order
 		if (Model=="NegBin"){
-			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.tuning=alpha,lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
+			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.tuning=lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
 			NB.alpha <- updates$NB.alpha
 			other.pars <- updates$other.pars
@@ -231,7 +231,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			NB.ALPHA[iter] <- NB.alpha
 		}
 		if (Model=="Poisson"){
-			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
+			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.tuning=lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
 			other.pars <- updates$other.pars
 			LAMBDA[,iter] <- updates$lambda
