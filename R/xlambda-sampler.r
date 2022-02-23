@@ -15,20 +15,20 @@
 #' @param Model "Poisson" or "NegBin".
 #' @param Proposal "NonUnif" or "Unif" (default).
 #' @param NB.alpha.ini Initial value for dispersion parameter for negaqtive-binomial distribution. Defaults to 1.
-#' @param lambda.tuning Tuning parameter for lambda.updater, which can be used to adjust acceptance rates for lambda sampling.
-#' @param lambda.additional Optional object to transfer additional information to lambda.updater . 
+#' @param lambda.additional Optional object to transfer additional information to lambda.updater. 
+#' @param other.pars Optional object to provide initial values for other model parameters.
 #' @param ndraws Number of iterations to run sampler after burn-in. One iteration comprises cycling through the full basis (possibly augmented by a combined move). Defaults to 10^4.
 #' @param burnin Number of iteractions for burn in period. Defaults to 2000, which is usually more than adequate.
 #' @param verbose Controls level of detail in recording lattice bases used.
 #' @param THIN Thinning parameter for output. Defaults to 1 (no thinning).
-#' @return A list with components X (an array, for which X[i,j,k] is the k-th sampled value of the i-th component of the j-th observation of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
+#' @return A list with components X (an array, for which X[i,j,k] is the k-th sampled value of the i-th component of the j-th observation of x), LAMBDA (a matrix, each row corresponding to samples for an entry of lambda), NB.ALPHA (a vector of sampler values of NB.alpha, NA if model is Poisson), OTHER.PARS (a matrix, each row corresponding to an additional parameter; zero rows if there are none) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
 #' @export
 #' @examples 
 #' data(LondonRoad)
 #' lu <- function(x,lambda,NB.alpha=NA,lambda.tuning=1,lambda.additional=NA) { list(lambda=rgamma(length(lambda),shape=x+0.5*LondonRoad$lambda,rate=1.5),other.pars=numeric(0),NB.alpha=NA) }
 #' Xlambdasampler(y=LondonRoad$y,A=LondonRoad$A,lambda.updater=lu,lambda.ini=LondonRoad$lambda,Model="Poisson",Method="Gibbs",tune.par=0.5,combine=FALSE)
 
-Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH", Reorder=TRUE, tune.par=0.5, combine=FALSE, x.order=NULL, x.ini=NULL, Model="Poisson", Proposal="Unif", NB.alpha.ini=1, lambda.tuning=NA, lambda.additional=NA, ndraws = 10000, burnin = 2000, verbose = 0, THIN = 1) {
+Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH", Reorder=TRUE, tune.par=0.5, combine=FALSE, x.order=NULL, x.ini=NULL, Model="Poisson", Proposal="Unif", NB.alpha.ini=1, lambda.additional=NA, other.pars=numeric(0), ndraws = 10000, burnin = 2000, verbose = 0, THIN = 1) {
 	require(lpSolve)
 	require(numbers)
 	require(extraDistr)
@@ -93,7 +93,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	X <- array(0, dim=c(r,ntime,ndraws + burnin))
 	LAMBDA <- matrix(0, r, ndraws + burnin)
 	NB.ALPHA <- numeric(ndraws + burnin)
-	other.pars <- list()
+	OTHER.PARS <- matrix(0,length(other.pars),ndraws + burnin)
 	if (verbose==1) X.ORDER <- matrix(0, r, ndraws + burnin)
 
 	NB.alpha <- NB.alpha.ini
@@ -223,23 +223,27 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 		}
 		if (verbose==1) X.ORDER[,iter] <- x.order
 		if (Model=="NegBin"){
-			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.tuning=lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
+			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
 			NB.alpha <- updates$NB.alpha
+			lambda.additional <- updates$lambda.additional
 			other.pars <- updates$other.pars
 			LAMBDA[,iter] <- updates$lambda
 			NB.ALPHA[iter] <- NB.alpha
+			if (length(other.pars) > 0) OTHER.PARS[,iter] <- other.pars
 		}
 		if (Model=="Poisson"){
-			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.tuning=lambda.tuning,lambda.additional=lambda.additional,other.pars=other.pars)
+			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
+			lambda.additional <- updates$lambda.additional
 			other.pars <- updates$other.pars
 			LAMBDA[,iter] <- updates$lambda
 			NB.ALPHA[iter] <- NA
+			if (length(other.pars) > 0) OTHER.PARS[,iter] <- other.pars
 		}
 	}
 	if (verbose==1) x.order <- X.ORDER
-	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],x.order=x.order)
+	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],OTHER.PARS=OTHER.PARS,x.order=x.order)
 }
 
 
