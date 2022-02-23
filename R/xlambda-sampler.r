@@ -94,6 +94,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	LAMBDA <- matrix(0, r, ndraws + burnin)
 	NB.ALPHA <- numeric(ndraws + burnin)
 	OTHER.PARS <- matrix(0,length(other.pars),ndraws + burnin)
+	OTHER.PARS[,1] <- other.pars
 	if (verbose==1) X.ORDER <- matrix(0, r, ndraws + burnin)
 
 	NB.alpha <- NB.alpha.ini
