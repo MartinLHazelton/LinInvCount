@@ -244,7 +244,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 		}
 	}
 	if (verbose==1) x.order <- X.ORDER
-	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],OTHER.PARS=OTHER.PARS,x.order=x.order)
+	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],OTHER.PARS=OTHER.PARS[seq(1,length(OTHER.PARS),by=THIN)],x.order=x.order)
 }
 
 
