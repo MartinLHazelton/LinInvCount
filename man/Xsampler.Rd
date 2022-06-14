@@ -21,6 +21,7 @@ Xsampler(
   ndraws = 10000,
   burnin = 2000,
   verbose = 0,
+  RandomMove = FALSE,
   THIN = 1
 )
 }
@@ -56,6 +57,8 @@ Xsampler(
 \item{burnin}{Number of iteractions for burn in period. Defaults to 2000, which is usually more than adequate.}
 
 \item{verbose}{Controls level of detail in recording lattice bases used.}
+
+\item{RandomMove}{If TRUE, sampling directions are selected at random at each iteration. If FALSE (default), the sampler cycles systematically through the available sampling directions.}
 
 \item{THIN}{Thinning parameter for output. Defaults to 1 (no thinning).}
 }
