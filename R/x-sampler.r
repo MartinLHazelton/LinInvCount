@@ -17,6 +17,7 @@
 #' @param ndraws Number of iterations to run sampler after burn-in. One iteration comprises cycling through the full basis (possibly augmented by a combined move). Defaults to 10^4.
 #' @param burnin Number of iteractions for burn in period. Defaults to 2000, which is usually more than adequate.
 #' @param verbose Controls level of detail in recording lattice bases used.
+#' @param RandomMove If TRUE, sampling directions are selected at random at each iteration. If FALSE (default), the sampler cycles systematically through the available sampling directions. 
 #' @param THIN Thinning parameter for output. Defaults to 1 (no thinning).
 #' @return A list with components X (a matrix, each row corresponding to samplers for an entry of x) and x.order (a vector describing dynamic selection of lattice bases, if verbose=1).
 #' @export
@@ -24,12 +25,13 @@
 #' data(LondonRoad)
 #' Xsampler(A=LondonRoad$A,y=LondonRoad$y,lambda=LondonRoad$lambda,Model="Poisson",Method="Gibbs",tune.par=0.5,combine=FALSE)
 
-Xsampler <- function (y, A, lambda, U=NULL, Method="MH", Reorder=TRUE, tune.par=0.5, combine=FALSE, x.order=NULL, x.ini=NULL, Model="Poisson", Proposal="Unif", NB.alpha=1, ndraws = 10000, burnin = 2000, verbose = 0, THIN = 1) {
+Xsampler <- function (y, A, lambda, U=NULL, Method="MH", Reorder=TRUE, tune.par=0.5, combine=FALSE, x.order=NULL, x.ini=NULL, Model="Poisson", Proposal="Unif", NB.alpha=1, ndraws = 10000, burnin = 2000, verbose = 0, RandomMove=FALSE, THIN = 1) {
 	require(lpSolve)
 	require(numbers)
 	require(extraDistr)
   	if(Model=="NegBin" & NB.alpha<=0) NB.alpha=1
 	if(Model=="Uniform") Method <- "Gibbs"
+	if(combine==TRUE) Proposal="Unif"
 	y <- as.numeric(y)
 	r <- ncol(A)
 	n <- nrow(A)
@@ -84,7 +86,9 @@ Xsampler <- function (y, A, lambda, U=NULL, Method="MH", Reorder=TRUE, tune.par=
 	if (verbose==1) X.ORDER[,1] <- x.order
 	
 	for (iter in seq(1, ndraws + burnin)) {
-		for (j in 1:m){
+		for (jjj in 1:m){
+			if (!RandomMove) j <- jjj
+			if (RandomMove)  j <- sample(1:m,1)
 			if (j <= ncol(U)) z <- U[,j]
 			if (j > ncol(U)){
 				delta <- 0
@@ -178,8 +182,8 @@ Xsampler <- function (y, A, lambda, U=NULL, Method="MH", Reorder=TRUE, tune.par=
  					}
 				}
 			}
-			X[x.order,1+(iter-1)*m+j] <- x
-			if (verbose==1) X.ORDER[,1+(iter-1)*m+j] <- x.order
+			X[x.order,1+(iter-1)*m+jjj] <- x
+			if (verbose==1) X.ORDER[,1+(iter-1)*m+jjj] <- x.order
 		}
 	}
 	if (verbose==1) x.order <- X.ORDER
