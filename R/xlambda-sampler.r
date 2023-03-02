@@ -3,7 +3,7 @@
 #' Consider the linear inverse problem y=Ax, where x follows a Poisson or negative binomial distribution with mean lambda = E[x]. This function jointly samples lambda and x. 
 #' @param y Matrix of sequence of observed count data vectors; each column is an observation.
 #' @param A Model configuration matrix, assumed to be binary.
-#  @param lambda.updater Function with required arguments x, lambda (and NB.alpha for negative binomial models) which updates lambda. 
+#' @param lambda.updater Function with required arguments x, lambda (and NB.alpha for negative binomial models) which updates lambda. 
 #' @param lambda.ini Initial mean vector for x.
 #' @param U Optional matrix the columns of which should be a Markov (sub)-basis.
 #' @param Method "MH" for Metropolis-Hastings sampler, "Gibbs" for Gibbs sampler.
@@ -243,7 +243,8 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			if (length(other.pars) > 0) OTHER.PARS[,iter] <- other.pars
 		}
 	}
-	if (verbose==1) x.order <- X.ORDER
+	if (verbose==1) x.order <- X.ORDER	
+	if (length(other.pars) == 0) OTHER.PARS <- matrix(NA,ncol=1,nrow=1)
 	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],OTHER.PARS=OTHER.PARS[seq(1,length(OTHER.PARS),by=THIN)],x.order=x.order)
 }
 
