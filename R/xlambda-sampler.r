@@ -233,6 +233,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 			NB.ALPHA[iter] <- NB.alpha
 			if (length(other.pars) > 0) OTHER.PARS[,iter] <- other.pars
 		}
+		
 		if (Model=="Poisson"){
 			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.additional=lambda.additional,other.pars=other.pars)
 			lambda <- updates$lambda[x.order]
@@ -245,7 +246,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	}
 	if (verbose==1) x.order <- X.ORDER	
 	if (length(other.pars) == 0) OTHER.PARS <- matrix(NA,ncol=1,nrow=1)
-	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],OTHER.PARS=OTHER.PARS[seq(1,length(OTHER.PARS),by=THIN)],x.order=x.order)
+	list(X=X[,,seq(1,ndraws + burnin,by=THIN)],LAMBDA=LAMBDA[,seq(1,ncol(LAMBDA),by=THIN)],NB.ALPHA=NB.ALPHA[seq(1,length(NB.ALPHA),by=THIN)],OTHER.PARS=OTHER.PARS[,seq(1,ncol(OTHER.PARS),by=THIN)],x.order=x.order)
 }
 
 
