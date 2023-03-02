@@ -32,6 +32,8 @@ Xlambdasampler(
 
 \item{A}{Model configuration matrix, assumed to be binary.}
 
+\item{lambda.updater}{Function with required arguments x, lambda (and NB.alpha for negative binomial models) which updates lambda.}
+
 \item{lambda.ini}{Initial mean vector for x.}
 
 \item{U}{Optional matrix the columns of which should be a Markov (sub)-basis.}
