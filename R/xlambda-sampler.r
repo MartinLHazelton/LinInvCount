@@ -98,7 +98,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 
 	NB.alpha <- NB.alpha.ini
 
-	if (!is.null(x.ini)) x.ini <- as.matrix(x.ini[x.order, ])
+	if (!is.null(x.ini)) x.ini <- as.matrix(as.matrix(x.ini)[x.order, ])
 	if (is.null(x.ini)){
        		x.ini <- matrix(0, nrow = r, ncol = ntime)
 	  	A.nozero <- A[,colSums(A)>0.01]
