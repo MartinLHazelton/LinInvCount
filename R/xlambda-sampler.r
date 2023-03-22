@@ -46,7 +46,6 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 
 	if (zero.cols) max.ratio <- max(c(5*lambda.ini,c(Y)))
 
-	if(!is.null(x.ini)) x.ini <- as.matrix(x.ini)
 	tol <- 10^{-10}
 
 	if (is.matrix(U)) Reorder=FALSE
@@ -99,7 +98,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 
 	NB.alpha <- NB.alpha.ini
 
-	if (!is.null(x.ini)) x.ini <- x.ini[x.order,]
+	if (!is.null(x.ini)) x.ini <- as.matrix(x.ini[x.order, ])
 	if (is.null(x.ini)){
        		x.ini <- matrix(0, nrow = r, ncol = ntime)
 	  	A.nozero <- A[,colSums(A)>0.01]
