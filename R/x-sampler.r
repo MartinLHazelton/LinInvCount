@@ -33,6 +33,17 @@ Xsampler <- function (y, A, lambda, U=NULL, Method="MH", Reorder=TRUE, tune.par=
 	if(Model=="Uniform") Method <- "Gibbs"
 	if(combine==TRUE) Proposal="Unif"
 	y <- as.numeric(y)
+        zero.cols.ind <- (colSums(A)==0)
+        non.zero.cols.ind <- (colSums(A) > 0)
+        zero.cols <- sum(zero.cols.ind)
+        if (zero.cols > 0){
+		r.full <- ncol(A)
+		A <- A[,non.zero.cols.ind]
+		lambda.full <- lambda
+		lambda <- lambda[non.zero.cols.ind]
+		x.ini <- x.ini[non.zero.cols.ind]
+		x.order <- x.order[non.zero.cols.ind]
+    	}
 	r <- ncol(A)
 	n <- nrow(A)
 	tol <- 10^{-10}
@@ -187,6 +198,14 @@ Xsampler <- function (y, A, lambda, U=NULL, Method="MH", Reorder=TRUE, tune.par=
 		}
 	}
 	if (verbose==1) x.order <- X.ORDER
+    	if (zero.cols > 0){
+		XX <- X
+		X <- matrix(NA,nrow=r.full,ncol=ncol(XX))
+		X[non.zero.cols.ind,] <- XX
+		for (i in 1:zero.cols){
+			X[which(zero.cols.ind)[i],] <- rpois(ncol(XX),lambda.full[which(zero.cols.ind)[i]])
+		}
+   	}
 	list(X=X[,seq(1,ncol(X),by=THIN)],x.order=x.order)
 }
 
