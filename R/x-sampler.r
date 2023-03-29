@@ -1,5 +1,5 @@
 #' Z-polytope sampler for linear inverse problems
-#'
+#' 
 #' For the linear inverse problem y=Ax where y and x are counts, the y-fibre (solution set) is a Z-polytope (i.e. the points on the integer lattice within a convex polytope). This function implements samplers for the Z-polytope, with using a dynamic lattice basis or a full Markov basis. The underyling model for x can be Poisson, uniform or negative binomial.
 #' @param y Vector of observed count data.
 #' @param A Model configuration matrix, assumed to be binary.
