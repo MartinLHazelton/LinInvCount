@@ -104,12 +104,11 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	  	A.nozero <- A[,colSums(A)>0.01]
 	  	r.nozero <- ncol(A.nozero)
         	for (tt in 1:ntime) {
-            		x.ini[colSums(A)>0.01, tt] <- lp("max", objective.in = rep(1, r.nozero), const.mat = A.nozero, const.dir = rep("=", nrow(A)), const.rhs = c(Y[, tt]), all.int = T)$solution
-			x.ini[colSums(A)<0.01 ,tt] <- mean(x.ini[colSums(A)>0.01 ,tt])
+            	x.ini[, tt] <- lp("max", objective.in = (1*colSums(A)>0), const.mat = A, const.dir = rep("=",nrow(A)), const.rhs = c(Y[, tt]), all.int = T)$solution
         	}
 	}
 	xx <- x.ini
-        X[x.order,,1] <- xx
+    X[x.order,,1] <- xx
 	LAMBDA[x.order,1] <- lambda
 	if (verbose==1) X.ORDER[,1] <- x.order
 
