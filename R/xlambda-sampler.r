@@ -101,6 +101,8 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	if (!is.null(x.ini)) x.ini <- as.matrix(as.matrix(x.ini)[x.order, ])
 	if (is.null(x.ini)){
        		x.ini <- matrix(0, nrow = r, ncol = ntime)
+	  	A.nozero <- A[,colSums(A)>0.01]
+	  	r.nozero <- ncol(A.nozero)
         	for (tt in 1:ntime) {
             	x.ini[, tt] <- lp("max", objective.in = (1*colSums(A)>0), const.mat = A, const.dir = rep("=",nrow(A)), const.rhs = c(Y[, tt]), all.int = T)$solution
         	}
@@ -220,7 +222,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 		}
 		if (verbose==1) X.ORDER[,iter] <- x.order
 		if (Model=="NegBin"){
-			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.additional=lambda.additional,other.pars=other.pars)
+			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],NB.alpha=NB.alpha,lambda.additional=lambda.additional,other.pars=other.pars,iter=iter)
 			lambda <- updates$lambda[x.order]
 			NB.alpha <- updates$NB.alpha
 			lambda.additional <- updates$lambda.additional
@@ -231,7 +233,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 		}
 		
 		if (Model=="Poisson"){
-			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.additional=lambda.additional,other.pars=other.pars)
+			updates <- lambda.updater(x=xx[order(x.order),],lambda=lambda[order(x.order)],lambda.additional=lambda.additional,other.pars=other.pars,iter=iter)
 			lambda <- updates$lambda[x.order]
 			lambda.additional <- updates$lambda.additional
 			other.pars <- updates$other.pars
