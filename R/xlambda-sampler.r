@@ -34,6 +34,7 @@ Xlambdasampler <- function (y, A, lambda.updater, lambda.ini, U=NULL, Method="MH
 	require(extraDistr)
   	if(Model=="NegBin" & NB.alpha.ini<=0) NB.alpha.ini=1
 	if(Model=="Uniform") Method <- "Gibbs"
+	if(is.null(lambda.additional$adapt.time)) lambda.additional$adapt.time <- burnin
 
 	zero.cols.ind <- which(colSums(A)==0)
 	non.zero.cols.ind <- which(colSums(A) > 0)
