@@ -13,7 +13,7 @@ effectiveSize(x)
 Effective sample sizes for each variable
 }
 \description{
-Version of effectiveSize from coda package, modified for ease of use with DynamicLatticeBasis package.
+Version of effectiveSize from coda package, modified for ease of use with LinInvCount package.
 }
 \examples{
 data(BXno3way)

@@ -1,6 +1,6 @@
 #' Effective sample size
 #'
-#' Version of effectiveSize from coda package, modified for ease of use with DynamicLatticeBasis package.
+#' Version of effectiveSize from coda package, modified for ease of use with LinInvCount package.
 #' @param x A matrix of MCMC out, with rows correspondings to variables and columns to iterations.
 #' @return Effective sample sizes for each variable
 #' @export
