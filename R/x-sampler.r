@@ -193,6 +193,7 @@ Xsampler <- function (y, A, lambda, U=NULL, Method="MH", Reorder=TRUE, tune.par=
  					}
 				}
 			}
+			x <- round(x,10)
 			X[x.order,1+(iter-1)*m+jjj] <- x
 			if (verbose==1) X.ORDER[,1+(iter-1)*m+jjj] <- x.order
 		}
